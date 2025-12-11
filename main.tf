@@ -3,9 +3,14 @@ data "aws_vpc" "default" {
   default = true
 }
 
+# Random ID for unique resource naming
+resource "random_id" "suffix" {
+  byte_length = 4
+}
+
 # Security Group for Web Server
 resource "aws_security_group" "web_server_sg" {
-  name        = "${var.project_name}-web-sg"
+  name        = "${var.project_name}-web-sg-${random_id.suffix.hex}"
   description = "Security group for web server allowing HTTP, HTTPS, and SSH"
   vpc_id      = data.aws_vpc.default.id
 
