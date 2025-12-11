@@ -9,7 +9,7 @@ variable "aws_region" {
 variable "instance_type" {
   description = "EC2 instance type"
   type        = string
-  default     = "t2.micro"
+  default     = "t3.micro"  # Free tier eligible in ap-south-1
 }
 
 # AMI ID variable (Ubuntu 22.04 LTS for ap-south-1)
