@@ -113,6 +113,12 @@ jobs:
           echo "Waiting for SSH to be ready..."
           timeout 300 bash -c 'until nc -z -w 2 $0 22; do sleep 5; done' $INSTANCE_IP
           
+          # 3.5 Wait for cloud-init (user_data) to complete
+          # This ensures Nginx is installed and permissions are set before we try to copy files
+          echo "Waiting for cloud-init (instance setup) to complete..."
+          # We loop here because sometimes ssh is ready but cloud-init isn't fully up yet or fails transiently
+          timeout 300 ssh -o StrictHostKeyChecking=no -i deploy_key.pem ubuntu@$INSTANCE_IP "cloud-init status --wait"
+          
           # 4. Copy the index.html file to the server
           # Note: We copy to a temp location first if strict checking requires it, but with -o StrictHostKeyChecking=no we can go direct.
           # However, we only have write access to /home/ubuntu, not /var/www/html directly unless we changed permissions (which we did in user_data)
