@@ -98,6 +98,32 @@ jobs:
           # Set outputs for potential use in other jobs
           echo "instance_ip=$INSTANCE_IP" >> $GITHUB_OUTPUT
           echo "website_url=$WEBSITE_URL" >> $GITHUB_OUTPUT
+
+      - name: Deploy Site Content
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        run: |
+          # 1. Extract the private key from Terraform output
+          terraform output -raw private_key > deploy_key.pem
+          chmod 600 deploy_key.pem
+          
+          # 2. Get the Instance IP
+          INSTANCE_IP=$(terraform output -raw instance_public_ip)
+          
+          # 3. Wait for SSH to be ready (retrying loop)
+          echo "Waiting for SSH to be ready..."
+          timeout 300 bash -c 'until nc -z -w 2 $0 22; do sleep 5; done' $INSTANCE_IP
+          
+          # 4. Copy the index.html file to the server
+          # Note: We copy to a temp location first if strict checking requires it, but with -o StrictHostKeyChecking=no we can go direct.
+          # However, we only have write access to /home/ubuntu, not /var/www/html directly unless we changed permissions (which we did in user_data)
+          
+          echo "Deploying site/index.html to $INSTANCE_IP..."
+          scp -o StrictHostKeyChecking=no -i deploy_key.pem site/index.html ubuntu@$INSTANCE_IP:/var/www/html/index.html
+          
+          # 5. Cleanup key
+          rm deploy_key.pem
+          
+          echo "✅ Content deployed successfully!"
           
       - name: Comment PR with Plan
         if: github.event_name == 'pull_request'
