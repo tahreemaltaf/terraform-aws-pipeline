@@ -4,6 +4,8 @@
 ![AWS](https://img.shields.io/badge/AWS-EC2-FF9900?logo=amazon-aws&logoColor=white)
 ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-CI%2FCD-2088FF?logo=github-actions&logoColor=white)
 
+> **Pipeline Status**: Verified and tested - Last successful deployment: 2025-12-12
+
 A fully automated infrastructure pipeline that deploys an EC2 instance with Nginx web server on every push to GitHub. This project demonstrates Infrastructure as Code (IaC) best practices with zero manual intervention.
 
 ## 🚀 Features
