@@ -113,11 +113,11 @@ jobs:
           echo "Waiting for SSH to be ready..."
           timeout 300 bash -c 'until nc -z -w 2 $0 22; do sleep 5; done' $INSTANCE_IP
           
-          # 3.5 Wait for cloud-init (user_data) to complete
-          # This ensures Nginx is installed and permissions are set before we try to copy files
-          echo "Waiting for cloud-init (instance setup) to complete..."
-          # We loop here because sometimes ssh is ready but cloud-init isn't fully up yet or fails transiently
-          timeout 300 ssh -o StrictHostKeyChecking=no -i deploy_key.pem ubuntu@$INSTANCE_IP "cloud-init status --wait"
+          # 3.5 Wait for Web Root Directory (Robust Check)
+          # We loop checking for the directory. This handles both SSH connection readiness AND Nginx installation timing.
+          echo "Waiting for /var/www/html to be created..."
+          timeout 300 bash -c 'until ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=no -i deploy_key.pem ubuntu@$INSTANCE_IP "test -d /var/www/html"; do echo "Directory not ready yet, retrying..."; sleep 10; done'
+
           
           # 4. Copy the index.html file to the server
           # Note: We copy to a temp location first if strict checking requires it, but with -o StrictHostKeyChecking=no we can go direct.
