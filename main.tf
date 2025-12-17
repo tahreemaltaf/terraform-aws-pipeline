@@ -214,7 +214,7 @@ locals {
     </div>
   </body>
   </html>
-  HTML
+HTML
     
     echo "Web server setup completed successfully!"
   EOF
